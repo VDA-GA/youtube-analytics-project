@@ -1,14 +1,12 @@
-from googleapiclient.discovery import build
-import os
+from src.channel import APIMixin
 
 
-class Video:
+class Video(APIMixin):
 
     def __init__(self, video_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
-        __api_key: str = os.getenv('YT_API_KEY')
         self.video_id = video_id
-        youtube = build('youtube', 'v3', developerKey=__api_key)
+        youtube = APIMixin.get_service()
         video_response = youtube.videos().list(part='snippet,statistics,contentDetails,topicDetails',
                                                id=video_id
                                                ).execute()
