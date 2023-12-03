@@ -1,15 +1,16 @@
 import json
 import os
 from typing import Any
+
 from googleapiclient.discovery import build
 
 
 class APIMixin:
-    __api_key: str = os.getenv('YT_API_KEY')
+    __api_key: str = os.getenv("YT_API_KEY")
 
     @classmethod
     def get_service(cls) -> Any:
-        return build('youtube', 'v3', developerKey=cls.__api_key)
+        return build("youtube", "v3", developerKey=cls.__api_key)
 
 
 class Channel(APIMixin):
@@ -18,16 +19,23 @@ class Channel(APIMixin):
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         self.__channel_id = channel_id
-        self.channel_info = APIMixin.get_service().channels().list(id=channel_id, part='snippet,statistics').execute()
-        self.title = self.channel_info['items'][0]['snippet']['title']
-        self.description = self.channel_info['items'][0]['snippet']['description']
-        self.url = 'https://www.youtube.com/channel/' + self.__channel_id
-        self.subscriber_count = int(self.channel_info['items'][0]['statistics']['subscriberCount'])
-        self.video_count = self.channel_info['items'][0]['statistics']['videoCount']
-        self.view_count = self.channel_info['items'][0]['statistics']['viewCount']
+        self.channel_info = (
+            APIMixin.get_service()
+            .channels()
+            .list(id=channel_id, part="snippet,statistics")
+            .execute()
+        )
+        self.title = self.channel_info["items"][0]["snippet"]["title"]
+        self.description = self.channel_info["items"][0]["snippet"]["description"]
+        self.url = "https://www.youtube.com/channel/" + self.__channel_id
+        self.subscriber_count = int(
+            self.channel_info["items"][0]["statistics"]["subscriberCount"]
+        )
+        self.video_count = self.channel_info["items"][0]["statistics"]["videoCount"]
+        self.view_count = self.channel_info["items"][0]["statistics"]["viewCount"]
 
     def __str__(self):
-        return f'{self.title} ({self.url})'
+        return f"{self.title} ({self.url})"
 
     def __add__(self, other):
         return self.subscriber_count + other.subscriber_count
@@ -58,5 +66,5 @@ class Channel(APIMixin):
 
     def to_json(self, name_file: str) -> None:
         """Сохраняет в файл значения атрибутов экземпляра класса Channel"""
-        with open(name_file, 'w', encoding='utf-8') as file:
+        with open(name_file, "w", encoding="utf-8") as file:
             file.write(json.dumps(self.__dict__, indent=2, ensure_ascii=False))
